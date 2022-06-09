@@ -24,11 +24,11 @@
     <h1>Source : {{data.source}}</h1>
     <h1>Typeobj : {{data.typeobj}}</h1>
     <button onclick="myFunction()">Click me</button>
-    <script >
+    <script>
       // Your access token can be found at: https://cesium.com/ion/tokens.
       // This is the default access token from your ion account
-      function myFunction(){
-        alert("Click")
+      function myFunction() {
+        alert("Click");
         viewer.trackedEntity = airplaneEntity;
       }
       Cesium.Ion.defaultAccessToken =
@@ -36,6 +36,8 @@
 
       // STEP 4 CODE (replaces steps 2 and 3)
       // Keep your `Cesium.Ion.defaultAccessToken = 'your_token_here'` line from before here.
+ 
+
       const viewer = new Cesium.Viewer("cesiumContainer", {
         terrainProvider: Cesium.createWorldTerrain(),
       });
@@ -43,8 +45,11 @@
         Cesium.createOsmBuildings()
       );
 
-      
+      var credit = new Cesium.Credit(
+        '<a href="https://www.facebook.com/" target="_blank"><img src="https://sv1.picz.in.th/images/2022/06/09/VWcK1R.png" style=" width:70px; height=40px; margin=200px; " title="Zircon"/> </a>'
+      );
 
+      viewer.scene.frameState.creditDisplay.addDefaultCredit(credit);
       /* Initialize the viewer clock:
         Assume the radar samples are 30 seconds apart, and calculate the entire flight duration based on that assumption.
         Get the start and stop date times of the flight, where the start is the known flight departure time (converted from PST
@@ -63,26 +68,26 @@
       var longitude = [];
       var height = [];
       //console.log({{data.msg_epoch}})
-      for (let l = 0; l< result.length;l++){
-        if(index === 6){
+      for (let l = 0; l < result.length; l++) {
+        if (index === 6) {
           // push height data
-          height.push(parseFloat(result[l])*1000)
+          height.push(parseFloat(result[l]) * 1000);
         }
-        if(index === 7){
+        if (index === 7) {
           // push lat data
-          latitude.push(parseFloat(result[l]))
+          latitude.push(parseFloat(result[l]));
         }
-        if(index === 8){
+        if (index === 8) {
           // push long data
-          longitude.push(parseFloat(result[l]))
+          longitude.push(parseFloat(result[l]));
         }
 
         index++;
-        if(index>8){
-          index=0;
+        if (index > 8) {
+          index = 0;
         }
-      } 
-      
+      }
+
       const timeStepInSeconds = 1;
       const totalSeconds = timeStepInSeconds * result.length;
 
@@ -103,7 +108,7 @@
 
       // The SampledPositionedProperty stores the position and timestamp for each sample along the radar sample series.
       const positionProperty = new Cesium.SampledPositionProperty();
-      
+
       for (let i = 0; i < latitude.length; i++) {
         //const dataPoint = result[i];
         // Declare the time for this individual sample and store it in a new JulianDate instance.
@@ -129,7 +134,7 @@
       }
 
       // STEP 6 CODE (airplane entity)
-      const positionRocket = Cesium.Cartesian3.fromDegrees()
+      const positionRocket = Cesium.Cartesian3.fromDegrees();
       async function loadModel() {
         // Load the glTF model from Cesium ion.
         const airplaneUri = await Cesium.IonResource.fromAssetId(1111699);
@@ -143,22 +148,28 @@
           // Automatically compute the orientation from the position.
           orientation: new Cesium.VelocityOrientationProperty(positionProperty),
           path: new Cesium.PathGraphics({ width: 3 }),
-          name : "{{data.sat_name}}",
-
+          name: "{{data.sat_name}} " + "   ( {{data.typeobj}} )",
+          description:
+            `<table class="cesium-infoBox-defaultTable"><tbody><tr><th>NORAD ID : </th> <th> {{data}}</th></tr>` +
+            `<tr><th>Intldes : </th><th>{{data.intldes}}</th></tr>` +
+            `<tr><th>Country : </th><th>{{data.country}}</th></tr>` +
+            `<tr><th>Msg Epoch : </th><th>{{data.msg_epoch}}</th></tr>` +
+            `<tr><th>Decay Epoch : </th><th>{{data.decay_epoch}}</th></tr>` +
+            `<tr><th>Rcs : </th><th>{{data.rcs}}</th></tr>` +
+            `<tr><th>Source : </th><th>{{data.source}}</th></tr>` +
+            `</tbody></table>`,
         });
-        airplaneEntity.InfoBox("Hi")
+
         viewer.trackedEntity = airplaneEntity;
       }
 
       loadModel();
 
-      function myFunction(){
-        alert("Click")
+      function myFunction() {
+        alert("Click");
         loadModel();
       }
-      console.log("Load Model Success")
+      console.log("Load Model Success");
     </script>
   </body>
 </html>
-
-
