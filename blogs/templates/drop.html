@@ -6,51 +6,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.93/Build/Cesium/Cesium.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap"
+      rel="stylesheet"
+    />
     <link
       href="https://cesium.com/downloads/cesiumjs/releases/1.93/Build/Cesium/Widgets/widgets.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="{% static '/frontend/css/style.css' %}">
-    <style></style>
+    {% comment %}
+    <link rel="stylesheet" href="{% static '/frontend/css/style.css' %}" />
+    {% endcomment %}
     <title>Cesium</title>
   </head>
   <body>
-      <div class="container">
-      
-
-    
-      <div id="cesiumContainer"></div>
+    <div class="container">
+      <div id="cesiumContainer" class="fullSize"></div>
       <div id="toolbar"></div>
-      <div class="info-table" style="text-align:center;">
+      <div class="info-table" style="text-align: center">
         <table class="darkTable">
           <thead>
-          <tr>
-          <th colspan="5">Location <span class="display-status"></span></th>
-          </tr>
+            <tr>
+              <th colspan="5">Location <span class="display-status"></span></th>
+            </tr>
           </thead>
           <tbody>
-          <tr>
-          <td>Date</td>
-          <td>Height</td>
-          <td>Latitude</td>
-          <td>Longtitude</td>
-          <td>Velocity</td>
-          </tr>
-          <tr>
-          <td><p class="display-time"></td>
-          <td><p class="display-height"></td>
-          <td><p class="display-lat"></td>
-          <td><p class="display-long"></td>
-          <td><p class="display-velocity"></td>
-          </tr>
+            <tr>
+              <td>Date</td>
+              <td>Height</td>
+              <td>Latitude</td>
+              <td>Longtitude</td>
+              <td>Velocity</td>
+            </tr>
+            <tr>
+              <td><p class="display-time"></p></td>
+              <td><p class="display-height"></p></td>
+              <td><p class="display-lat"></p></td>
+              <td><p class="display-long"></p></td>
+              <td><p class="display-velocity"></p></td>
+            </tr>
           </tbody>
         </table>
       </div>
-      </div>
-      <button onClick="myFunction()">Test</button>
+    </div>
+    <button onClick="myFunction()">Test</button>
     <script>
       // Your access token can be found at: https://cesium.com/ion/tokens.
       // This is the default access token from your ion account
@@ -85,8 +86,8 @@
       {% comment %} var credit = new Cesium.Credit(
         '<a href="https://www.facebook.com/" target="_blank"><img src="https://sv1.picz.in.th/images/2022/06/09/VWcK1R.png" style=" width:70px; height=40px; margin=200px; " title="Zircon"/> </a>'
       );
-      
-     
+
+
       //document.querySelector("#cesium-viewer-bottom").style.display= "none";
       viewer.scene.frameState.creditDisplay.addDefaultCredit(credit); {% endcomment %}
       {% comment %} $(document).ready(function() {
@@ -94,7 +95,7 @@
       }); {% endcomment %}
 
       // Edit Logo Here !!!
-      
+
       $(".cesium-widget-credits").html('<div style="display: inline;"><img title="AstroLab" src="https://sv1.picz.in.th/images/2022/06/09/VWcK1R.png" width="120" height="50" ></div>');
 
       // Animate of data ex.1s per lat long
@@ -159,11 +160,11 @@
           ti : Cesium.JulianDate.fromIso8601(resultTime[k].replace(/\//g,"-").replace(/\s/g,"T") + "Z"),
           velocity : Math.sqrt(Math.pow(vx[k], 2)+Math.pow(vy[k], 2)+Math.pow(vz[k], 2))
         });
-        
+
       }
 
       //console.log(entityPosition)
-      
+
       const timeStepInSeconds = 1;
       const totalSeconds = timeStepInSeconds * latitude.length + 1000;
       const start = Cesium.JulianDate.fromIso8601(datetime);
@@ -217,7 +218,7 @@
       }
 
       // STEP 6 CODE (object entity)
-
+      let searchObj2=null;
       async function loadModel() {
         // Load the glTF model from Cesium ion.
         {% comment %} const heading = Cesium.Math.toRadians(35.5);
@@ -237,7 +238,6 @@
         const objectUri = await Cesium.IonResource.fromAssetId(1124763);
         const orientation = new Cesium.VelocityOrientationProperty(positionProperty)
         const objectEntity = viewer.entities.add({
-          id:"123",
           availability: new Cesium.TimeIntervalCollection([
             new Cesium.TimeInterval({ start: start, stop: stop }),
           ]),
@@ -269,70 +269,36 @@
               pixelOffset: new Cesium.Cartesian2(0, -50)
           }
         });
+        displayTimer();
 
-        viewer.flyTo(objectEntity).then(function(){viewer.trackedEntity = objectEntity; viewer.selectedEntity = objectEntity; displayTimer();});
+        viewer.flyTo(objectEntity).then(function(){viewer.trackedEntity = objectEntity; viewer.selectedEntity = objectEntity;});
         //console.log(objectEntity.path.material.color._value)
         //$(".display-time").text(entityPosition.at(-1).ti);
       }
-      let int1 = null;
-      let gree = 255;
-      function changeColorPath(){
-        int1 = setInterval(changeColorPath, 500);
-        console.log(gree)
-        viewer.entities.values[0].path.material.color._value = Cesium.Color.fromBytes(255,gree,0)
-        if(gree != 0) gree--;
-        
-        
-        {% comment %} const pathEntity = viewer.entities.add({
-          availability: new Cesium.TimeIntervalCollection([
-            new Cesium.TimeInterval({ start: start, stop: stop }),
-          ]),
-          position: positionProperty,
-          // Attach the 3D model instead of the green point.
-          path: new Cesium.PathGraphics({
-            width: 1,
-            material: Cesium.Color.RED,
-          }),
-        }); {% endcomment %}
-        {% comment %} for(let o = 255;o>=0;o--){
-          viewer.entities.values[0].path.material.color._value = Cesium.Color.fromBytes(255,o,0)
-        } {% endcomment %}
-
-        // IMPORTANT !!!!!
-        //viewer.entities.values[0].path.material.color._value = Cesium.Color.YELLOW
-        //console.log(viewer.entities.values[0].path.material.color._value)
-      }
 
       loadModel();
-      
+
       function map(x, in_min, in_max, out_min, out_max) {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
       }
 
       function myFunction() {
+        console.log(viewer.entities.values[0].position.getValue(viewer.clock.currentTime)+ (new Cesium.Cartesian3(33,33,200)))
+        console.log(viewer.entities.values[0].position.getValue(viewer.clock.currentTime))
+        viewer.camera.flyTo({
+          destination: viewer.entities.values[0].position.getValue(viewer.clock.currentTime),
+          orientation: {
+            heading: Cesium.Math.toRadians(20.0),
+            pitch: Cesium.Math.toRadians(-35.0),
+            roll: 0.0,
+          },
+        });
+        //viewer.scene.camera.lookAt(viewer.entities.values[0].position.getValue(viewer.clock.currentTime), new Cesium.Cartesian3(0,0,10000));
         //let serchObj = entityPosition.find((e) => parseInt(e.ti.secondsOfDay) == parseInt(viewer.clock.currentTime.secondsOfDay));
         //console.log(parseInt(viewer.clock.currentTime.secondsOfDay));
         //$(".display-time").text(viewer.clock.currentTime);
         //loadPath()
-        var hi = 200 
-        if(hi > 200){
-          //console.log("Green")
-        }
-        else if(hi <= 200 && hi>= 161){
-          //console.log("Yellow")
-          console.log(map(hi,161,200,255,0))
-          
-        }
-        else if(hi <= 159 && hi>= 120){
-          //console.log("orange")
-          //console.log(map(hi,159,200,0,255))
-          //console.log(map(altitude,120,159,0,255))
-
-          //viewer.entities.values[0].path.material.color._value = Cesium.Color.fromBytes(red,green,0)
-        }
-        else{
-          //console.log("Red")
-        }
+        //viewer.flyTo(viewer.entities.values[0],{ offset:new Cesium.HeadingPitchRange(Cesium.Math.toRadians(-15), Cesium.Math.toRadians(-20 ), 50000),duration : 5 }).then(function(){viewer.trackedEntity = viewer.entities.values[0]; viewer.selectedEntity = viewer.entities.values[0];});
       }
       console.log("Load Model Success");
 
@@ -345,8 +311,6 @@
       function displayTimer() {
         int = setInterval(displayTimer, 1000);
         searchObj = entityPosition.find((e) => parseInt(e.ti.secondsOfDay) === parseInt(viewer.clock.currentTime.secondsOfDay));
-        //console.log(searchObj)
-        //console.log(searchObj)
         if(Cesium.JulianDate.greaterThan(viewer.clock.currentTime, entityPosition.at(-1).ti)){
           $(".display-status").text("( Object Dropped )")
           $(".display-height").text("0 km.")
@@ -360,12 +324,12 @@
           $(".display-long").text( searchObj.long)
           $(".display-velocity").text( searchObj.velocity.toFixed(2) + " km/s")
         }
-        
+
         const date = new Date(viewer.clock.currentTime)
         //const dateformat = date.toLocaleString('en-US',{ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' ,timezone: 'UTC',  })
         const dateformat = date.toLocaleString('en-GB',{ hour12: false ,timeZone: 'UTC',  })
-        $(".display-time").text(dateformat) 
-        
+        $(".display-time").text(dateformat)
+
         let altitude = parseInt(searchObj.alt);
         if(altitude > 200){
           // Green Zone !!!
@@ -376,7 +340,7 @@
           // Yellow Zone !!!
           red = map(altitude,160,200,255,0);
           green = 255 ;
-          
+
         }
         else if(altitude <= 159 && altitude>= 120){
           // Orange Zone !!!
