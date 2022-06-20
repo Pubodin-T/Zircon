@@ -4,6 +4,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-type"
+      content="application/x-www-form-urlencoded; charset=utf-8"
+    />
+    <meta http-equiv="Cache-control" content="public" />
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.93/Build/Cesium/Cesium.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -20,10 +25,72 @@
     <link rel="stylesheet" href="{% static '/frontend/css/style.css' %}" />
     {% endcomment %}
     <title>Cesium</title>
+    <style>
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+      }
+
+      input:checked + .slider {
+        background-color: #2196f3;
+      }
+
+      input:focus + .slider {
+        box-shadow: 0 0 1px #2196f3;
+      }
+
+      input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+      }
+
+      /* Rounded sliders */
+      .slider.round {
+        border-radius: 34px;
+      }
+
+      .slider.round:before {
+        border-radius: 50%;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
       <div id="cesiumContainer" class="fullSize"></div>
+      <div id="cesiumContainer2" style="background-color: #2196f3;width : 500px;height : 500px;"></div>
       <div id="toolbar"></div>
       <div class="info-table" style="text-align: center">
         <table class="darkTable">
@@ -52,6 +119,15 @@
       </div>
     </div>
     <button onClick="myFunction()">Test</button>
+    <label class="switch">
+      <input type="checkbox" onClick="trackedEntity()" checked />
+      <span class="slider round"></span>
+    </label>
+
+    <label class="switch">
+      <input type="checkbox" id="show-earth2" checked />
+      <span class="slider round"></span>
+    </label>
     <script>
       // Your access token can be found at: https://cesium.com/ion/tokens.
       // This is the default access token from your ion account
@@ -96,10 +172,11 @@
 
       // Edit Logo Here !!!
 
-      $(".cesium-widget-credits").html('<div style="display: inline;"><img title="AstroLab" src="https://sv1.picz.in.th/images/2022/06/09/VWcK1R.png" width="120" height="50" ></div>');
+      $(".cesium-widget-credits").html('<div style="display: inline;"><a href="https://demo.gistda.or.th/news_view.php?n_id=2325&lang=EN" target="_blank"><img title="Zircon" src="{% static '/asset/zircon.png' %}" style=" width: 120px; height:80px " ></a></div>');
 
       // Animate of data ex.1s per lat long
-      const dataset = "{{data.dataset}}";
+      const dataset = "";
+      const dateset = "{{date}}"
       // Regex get float data
       let re = /[\-| ][0-9]+\.[0-9]+/gm;
       let result = dataset.match(re);
@@ -110,9 +187,16 @@
       var vx = [];
       var vy = [];
       var vz = [];
+      var rcs = "{{rcs}}"
+      let int = null;
+      //console.log(dateset[1])
+      //console.log({{velocity}}[0])
+      //console.log({{height}}.length)
+      //console.log({{latitude}})
+      //console.log({{longitude}})
 
       //console.log({{data.msg_epoch}})
-      for (let l = 0; l < result.length; l++) {
+      {% comment %} for (let l = 0; l < result.length; l++) {
         if (index === 3) {
           // push lat data
           vx.push(parseFloat(result[l]));
@@ -143,22 +227,23 @@
         if (index > 8) {
           index = 0;
         }
-      }
+      } {% endcomment %}
 
       // Regex Date and Format to ISO Format ex.2019-01-01T00:00:00.000Z
-      let reTime = /\d{4}\/\d\d\/\d\d\s\d\d:\d\d:\d\d\.\d*/gm;
-      let resultTime = dataset.match(reTime);
-      let datetime = resultTime[0].replace(/\//g,"-").replace(/\s/g,"T") + "Z";
+      let reTime = /\d{4}\-\d\d\-\d\dT\d\d:\d\d:\d\d\.\d*Z/gm;
+      let resultTime = dateset.match(reTime);
+      //console.log(resultTime[0])
+      //let datetime = resultTime[0].replace(/\//g,"-").replace(/\s/g,"T") + "Z";
       //console.log(new Date(datetime).toISOString())
       var entityPosition = [];
 
-      for (let k = 0; k < latitude.length; k++){
+      for (let k = 0; k < {{latitude}}.length; k++){
         entityPosition.push({
-          lat : latitude[k],
-          long : longitude[k],
-          alt : parseFloat(height[k]/1000).toFixed(2),
-          ti : Cesium.JulianDate.fromIso8601(resultTime[k].replace(/\//g,"-").replace(/\s/g,"T") + "Z"),
-          velocity : Math.sqrt(Math.pow(vx[k], 2)+Math.pow(vy[k], 2)+Math.pow(vz[k], 2))
+          lat : {{latitude}}[k],
+          long : {{longitude}}[k],
+          alt : {{height}}[k].toFixed(2),
+          ti : Cesium.JulianDate.fromIso8601(resultTime[k]),
+          velocity : {{velocity}}[k]
         });
 
       }
@@ -166,8 +251,8 @@
       //console.log(entityPosition)
 
       const timeStepInSeconds = 1;
-      const totalSeconds = timeStepInSeconds * latitude.length + 1000;
-      const start = Cesium.JulianDate.fromIso8601(datetime);
+      const totalSeconds = timeStepInSeconds * {{latitude}}.length + 1000;
+      const start = Cesium.JulianDate.fromIso8601(resultTime[0]);
       const stop = Cesium.JulianDate.addSeconds(
         start,
         totalSeconds,
@@ -185,7 +270,8 @@
       // The SampledPositionedProperty stores the position and timestamp for each sample along the radar sample series.
       const positionProperty = new Cesium.SampledPositionProperty();
 
-      for (let i = 0; i < latitude.length; i++) {
+      for (let i = 0; i < {{latitude}}.length; i++) {
+
         //const dataPoint = result[i];
         // Declare the time for this individual sample and store it in a new JulianDate instance.
         const time = Cesium.JulianDate.addSeconds(
@@ -194,9 +280,9 @@
           new Cesium.JulianDate()
         );
         const position = Cesium.Cartesian3.fromDegrees(
-          longitude[i],
-          latitude[i],
-          height[i]
+          {{longitude}}[i],
+          {{latitude}}[i],
+          {{height}}[i]*1000
         );
         //console.log(time)
         // Store the position along with its timestamp.
@@ -218,7 +304,6 @@
       }
 
       // STEP 6 CODE (object entity)
-      let searchObj2=null;
       async function loadModel() {
         // Load the glTF model from Cesium ion.
         {% comment %} const heading = Cesium.Math.toRadians(35.5);
@@ -269,8 +354,8 @@
               pixelOffset: new Cesium.Cartesian2(0, -50)
           }
         });
-        displayTimer();
-
+        display();
+        int = setInterval(display, 50);
         viewer.flyTo(objectEntity).then(function(){viewer.trackedEntity = objectEntity; viewer.selectedEntity = objectEntity;});
         //console.log(objectEntity.path.material.color._value)
         //$(".display-time").text(entityPosition.at(-1).ti);
@@ -283,16 +368,29 @@
       }
 
       function myFunction() {
-        console.log(viewer.entities.values[0].position.getValue(viewer.clock.currentTime)+ (new Cesium.Cartesian3(33,33,200)))
-        console.log(viewer.entities.values[0].position.getValue(viewer.clock.currentTime))
+        console.log("Test")
+        viewer.trackedEntity = undefined
+
+
+
+        {% comment %} console.log(viewer.entities.values[0].position.getValue(viewer.clock.currentTime))
+        var nowPo = viewer.entities.values[0].position.getValue(viewer.clock.currentTime)
+        var test = {
+          x:0,
+          y:0,
+          z:0
+        }
+        new Cesium.Cartesian3.add(nowPo, Cesium.Cartesian3.fromDegrees(15,35,0),test)
+
+        console.log(test)
         viewer.camera.flyTo({
-          destination: viewer.entities.values[0].position.getValue(viewer.clock.currentTime),
+          destination: test,
           orientation: {
             heading: Cesium.Math.toRadians(20.0),
             pitch: Cesium.Math.toRadians(-35.0),
             roll: 0.0,
           },
-        });
+        }); {% endcomment %}
         //viewer.scene.camera.lookAt(viewer.entities.values[0].position.getValue(viewer.clock.currentTime), new Cesium.Cartesian3(0,0,10000));
         //let serchObj = entityPosition.find((e) => parseInt(e.ti.secondsOfDay) == parseInt(viewer.clock.currentTime.secondsOfDay));
         //console.log(parseInt(viewer.clock.currentTime.secondsOfDay));
@@ -303,14 +401,14 @@
       console.log("Load Model Success");
 
 
-      let int = null;
+      let isTracked = true;
       let searchObj = null;
       let green = 0;
       let red = 0;
 
-      function displayTimer() {
-        int = setInterval(displayTimer, 1000);
-        searchObj = entityPosition.find((e) => parseInt(e.ti.secondsOfDay) === parseInt(viewer.clock.currentTime.secondsOfDay));
+      function display() {
+        //console.log((e) => parseInt(e.ti.secondsOfDay) === parseInt(viewer.clock.currentTime.secondsOfDay))
+        searchObj = entityPosition.find((e) => parseInt(e.ti.secondsOfDay) === parseInt(viewer.clock.currentTime.secondsOfDay) && e.ti.dayNumber === viewer.clock.currentTime.dayNumber);
         if(Cesium.JulianDate.greaterThan(viewer.clock.currentTime, entityPosition.at(-1).ti)){
           $(".display-status").text("( Object Dropped )")
           $(".display-height").text("0 km.")
@@ -318,44 +416,60 @@
           $(".display-long").text(entityPosition.at(-1).long)
           $(".display-velocity").text("0 km/s")
         }
-        else{
+        else if (searchObj !== undefined){
+          $(".display-status").text("")
           $(".display-height").text( searchObj.alt + " km.")
           $(".display-lat").text( searchObj.lat)
           $(".display-long").text( searchObj.long)
           $(".display-velocity").text( searchObj.velocity.toFixed(2) + " km/s")
+          let altitude = parseInt(searchObj.alt);
+          if(altitude > 200){
+            // Green Zone !!!
+            green = 255;
+            red = 0;
+          }
+          else if(altitude <= 200 && altitude>= 160){
+            // Yellow Zone !!!
+            red = map(altitude,160,200,255,0);
+            green = 255 ;
+
+          }
+          else if(altitude <= 159 && altitude>= 120){
+            // Orange Zone !!!
+            green = map(altitude,120,159,0,255);
+            red = 255;
+          }
+          else{
+            // RED Zone !!!
+            green = 0;
+            red = 255;
+          }
         }
+
 
         const date = new Date(viewer.clock.currentTime)
         //const dateformat = date.toLocaleString('en-US',{ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' ,timezone: 'UTC',  })
         const dateformat = date.toLocaleString('en-GB',{ hour12: false ,timeZone: 'UTC',  })
         $(".display-time").text(dateformat)
-
-        let altitude = parseInt(searchObj.alt);
-        if(altitude > 200){
-          // Green Zone !!!
-          green = 255;
-          red = 0;
-        }
-        else if(altitude <= 200 && altitude>= 160){
-          // Yellow Zone !!!
-          red = map(altitude,160,200,255,0);
-          green = 255 ;
-
-        }
-        else if(altitude <= 159 && altitude>= 120){
-          // Orange Zone !!!
-          green = map(altitude,120,159,0,255);
-          red = 255;
-        }
-        else{
-          // RED Zone !!!
-          green = 0;
-          red = 255;
-        }
         viewer.entities.values[0].path.material.color._value = Cesium.Color.fromBytes(red,green,0)
-      };
 
-      //displayTimer();
+      };
+      function trackedEntity() {
+        if (isTracked === true) {
+          viewer.trackedEntity = undefined
+          viewer.selectedEntity = undefined
+          isTracked = false
+        }
+        else if (isTracked === false){
+          viewer.trackedEntity = viewer.entities.values[0]
+          viewer.selectedEntity = viewer.entities.values[0]
+          isTracked = true
+        }
+      }
+
+      $('#show-earth2').click(function() {
+        $('#cesiumContainer2').toggle();
+      })
     </script>
   </body>
 </html>

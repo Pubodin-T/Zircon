@@ -15,8 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from blogs import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include("blogs.urls"))
+    #path('',include("blogs.urls"))
+    path('',views.index),
+    path('drop',views.drop_sim),
+    path('Object-id/<int:objid>', views.match),
 ]
