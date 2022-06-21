@@ -26,6 +26,29 @@
     {% endcomment %}
     <title>Cesium</title>
     <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+      .container {
+        display: flex;
+        width: 100%;
+        height: 100%;
+      }
+      #cesiumContainer {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+      }
+      #cesiumContainer2 {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+
+
+    <style>
       .switch {
         position: relative;
         display: inline-block;
@@ -90,33 +113,33 @@
   <body>
     <div class="container">
       <div id="cesiumContainer" class="fullSize"></div>
-      <div id="cesiumContainer2" style="background-color: #2196f3;width : 500px;height : 500px;"></div>
-      <div id="toolbar"></div>
-      <div class="info-table" style="text-align: center">
-        <table class="darkTable">
-          <thead>
-            <tr>
-              <th colspan="5">Location <span class="display-status"></span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Date</td>
-              <td>Height</td>
-              <td>Latitude</td>
-              <td>Longtitude</td>
-              <td>Velocity</td>
-            </tr>
-            <tr>
-              <td><p class="display-time"></p></td>
-              <td><p class="display-height"></p></td>
-              <td><p class="display-lat"></p></td>
-              <td><p class="display-long"></p></td>
-              <td><p class="display-velocity"></p></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <div id="cesiumContainer2" class="fullSize"></div>
+    </div>
+    <div id="toolbar"></div>
+    <div class="info-table" style="text-align: center">
+      <table class="darkTable">
+        <thead>
+          <tr>
+            <th colspan="5">Location <span class="display-status"></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Date</td>
+            <td>Height</td>
+            <td>Latitude</td>
+            <td>Longtitude</td>
+            <td>Velocity</td>
+          </tr>
+          <tr>
+            <td><p class="display-time"></p></td>
+            <td><p class="display-height"></p></td>
+            <td><p class="display-lat"></p></td>
+            <td><p class="display-long"></p></td>
+            <td><p class="display-velocity"></p></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <button onClick="myFunction()">Test</button>
     <label class="switch">
@@ -129,6 +152,7 @@
       <span class="slider round"></span>
     </label>
     <script>
+      
       // Your access token can be found at: https://cesium.com/ion/tokens.
       // This is the default access token from your ion account
 
@@ -150,6 +174,16 @@
         Cesium.createOsmBuildings()
       );
 
+      const viewer2 = new Cesium.Viewer("cesiumContainer2", {
+        terrainProvider: Cesium.createWorldTerrain(),
+        geocoder: false,
+        fullscreenButton: false,
+        navigationHelpButton: false,
+        homeButton: false,
+        infoBox: false,
+        timeline: false,
+        
+      });
       // Pan Camera to Thailand by new Cesium.Rectangle(west, south, east, north)
       Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(63.076400,-31.700130,139.064604,52.234528);
       document.getElementById("animation_pathClock").style.display= "none";
@@ -267,6 +301,14 @@
       // Start playing the scene.
       viewer.clock.shouldAnimate = true;
 
+      viewer2.clock.startTime = start.clone();
+      viewer2.clock.stopTime = stop.clone();
+      viewer2.clock.currentTime = start.clone();
+      // Speed up the playback speed 50x.
+      viewer2.clock.multiplier = 1;
+      // Start playing the scene.
+      viewer2.clock.shouldAnimate = true;
+
       // The SampledPositionedProperty stores the position and timestamp for each sample along the radar sample series.
       const positionProperty = new Cesium.SampledPositionProperty();
 
@@ -304,6 +346,7 @@
       }
 
       // STEP 6 CODE (object entity)
+
       async function loadModel() {
         // Load the glTF model from Cesium ion.
         {% comment %} const heading = Cesium.Math.toRadians(35.5);
@@ -321,6 +364,7 @@
         ); {% endcomment %}
 
         const objectUri = await Cesium.IonResource.fromAssetId(1124763);
+        
         const orientation = new Cesium.VelocityOrientationProperty(positionProperty)
         const objectEntity = viewer.entities.add({
           availability: new Cesium.TimeIntervalCollection([
@@ -354,14 +398,47 @@
               pixelOffset: new Cesium.Cartesian2(0, -50)
           }
         });
-        display();
-        int = setInterval(display, 50);
+        console.log("Load Model 1")
+
         viewer.flyTo(objectEntity).then(function(){viewer.trackedEntity = objectEntity; viewer.selectedEntity = objectEntity;});
+        //console.log(objectEntity.path.material.color._value)
+        //$(".display-time").text(entityPosition.at(-1).ti);
+      }
+      async function loadModel2() {
+        // Load the glTF model from Cesium ion.     
+        const orientation = new Cesium.VelocityOrientationProperty(positionProperty)
+        const objectUri2 = await Cesium.IonResource.fromAssetId(1111699);
+        const objectEntity2 = viewer2.entities.add({
+          availability: new Cesium.TimeIntervalCollection([
+            new Cesium.TimeInterval({ start: start, stop: stop }),
+          ]),
+          model: { uri: objectUri2 , minimumPixelSize: 64,},
+          position: positionProperty,
+          // Attach the 3D model instead of the green point.
+          // Automatically compute the orientation from the position.
+          orientation: orientation,
+          path: new Cesium.PathGraphics({
+            width: 3  ,
+            material: Cesium.Color.ORANGE,
+          }),
+          name: "{{data.sat_name}} " + "  ( {{data.typeobj}} )",
+          label: {
+              text: "{{data.sat_name}}",
+              font: '16pt monospace',
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              outlineWidth: 1,
+              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+              pixelOffset: new Cesium.Cartesian2(0, -50)
+          }
+        });
+        console.log("Load Model 2")
+        
         //console.log(objectEntity.path.material.color._value)
         //$(".display-time").text(entityPosition.at(-1).ti);
       }
 
       loadModel();
+      loadModel2().then(function(){ console.log("Model Loaded"); int = setInterval(display, 50); display(); console.log()});
 
       function map(x, in_min, in_max, out_min, out_max) {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -452,6 +529,8 @@
         const dateformat = date.toLocaleString('en-GB',{ hour12: false ,timeZone: 'UTC',  })
         $(".display-time").text(dateformat)
         viewer.entities.values[0].path.material.color._value = Cesium.Color.fromBytes(red,green,0)
+        viewer2.entities.values[0].path.material.color._value = Cesium.Color.fromBytes(red,green,0)
+        viewer2.clock.currentTime = viewer.clock.currentTime
 
       };
       function trackedEntity() {
@@ -468,8 +547,59 @@
       }
 
       $('#show-earth2').click(function() {
-        $('#cesiumContainer2').toggle();
+        $('#cesiumContainer2').toggle(1000).css("background-color","red");
       })
+      //$('#cesiumContainer2.cesium-viewer-animationContainer').css({"display" : "none"})
+      document.querySelector("#cesiumContainer2 > div > div.cesium-viewer-animationContainer").style.display = 'none';
+      document.querySelector("#cesiumContainer2 > div > div.cesium-viewer-bottom").style.display = 'none';
+      let worldPosition;
+      let distance;
+
+      function syncView() {
+        // The center of the view is the point that the 3D camera is focusing on
+        const viewCenter = new Cesium.Cartesian2(
+          Math.floor(viewer.canvas.clientWidth / 2),
+          Math.floor(viewer.canvas.clientHeight / 2)
+        );
+        //console.log(viewCenter)
+        // Given the pixel in the center, get the world position
+        const newWorldPosition = viewer.scene.camera.pickEllipsoid(
+          viewCenter
+        );
+        //console.log(newWorldPosition)
+        if (Cesium.defined(newWorldPosition)) {
+          // Guard against the case where the center of the screen
+          // does not fall on a position on the globe
+          worldPosition = newWorldPosition;
+        }
+        // Get the distance between the world position of the point the camera is focusing on, and the camera's world position
+        distance = Cesium.Cartesian3.distance(
+          worldPosition,
+          viewer.scene.camera.positionWC
+        );
+        //console.log(distance)
+        //console.log(distance)
+        // Tell the 2D camera to look at the point of focus. The distance controls how zoomed in the 2D view is
+        // (try replacing `distance` in the line below with `1e7`. The view will still sync, but will have a constant zoom)
+        viewer2.scene.camera.lookAt(
+          worldPosition,
+          new Cesium.Cartesian3(0.0, 0.0, distance+10000000)
+        );
+      }
+      
+      // Apply our sync function every time the 3D camera view changes
+      viewer.camera.changed.addEventListener(syncView);
+      // By default, the `camera.changed` event will trigger when the camera has changed by 50%
+      // To make it more sensitive, we can bring down this sensitivity
+      viewer.camera.percentageChanged = 0.0001;
+      
+      // Since the 2D view follows the 3D view, we disable any
+      // camera movement on the 2D view
+      viewer2.scene.screenSpaceCameraController.enableRotate = false;
+      viewer2.scene.screenSpaceCameraController.enableTranslate = false;
+      viewer2.scene.screenSpaceCameraController.enableZoom = false;
+      viewer2.scene.screenSpaceCameraController.enableTilt = false;
+      viewer2.scene.screenSpaceCameraController.enableLook = false;
     </script>
   </body>
 </html>
