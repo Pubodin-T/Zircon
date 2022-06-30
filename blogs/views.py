@@ -32,6 +32,7 @@ def match(request, objid=None):
     longitude = []
     height = []
 
+
     for i in line_split:
         #print(i.split(','))
         splited = i.split(',')
@@ -41,6 +42,7 @@ def match(request, objid=None):
             height.append(float(splited[7]))
             latitude.append(float(splited[8]))
             longitude.append(float(splited[9]))
+
 
         
     #print(date)

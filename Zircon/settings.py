@@ -88,7 +88,7 @@ DATABASES = {
         'PORT' : ''
     }
 }
-
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators

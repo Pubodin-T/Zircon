@@ -153,15 +153,15 @@
         bottom: 45px;
         right: 20px;
         z-index: 99;
-        text-align: center;
         border: 2px solid white;
+        width: 31%;
       }
       table.darkTable {
         font-family: "Space Mono", monospace;
         border-radius: 50px;
         border: 10px solid black;
         background-color: #4a4a4a;
-        width: 580px;
+        width: 100%;
         height: 120px;
         text-align: center;
         border-collapse: collapse;
@@ -308,12 +308,13 @@
       }
       .menu__btn {
         position: fixed;
-        top: 20px;
+        top: 10px;
         left: 20px;
         width: 26px;
         height: 26px;
         cursor: pointer;
         z-index: 1;
+        padding-top: 10px;
       }
       .menu__btn > span,
       .menu__btn > span::before,
@@ -321,7 +322,7 @@
         display: block;
         position: absolute;
         width: 100%;
-        height: 2px;
+        height: 3px;
         background-color: #616161;
         transition-duration: .25s;
       }
@@ -359,15 +360,12 @@
         transition-duration: .25s;
         width: 170px;
       }
-      .menu__item:hover {
-        background-color: #CFD8DC;
-      }
-      .fa fa-arrow-left{
-        font-size: 30px;
+
+      #back-buttom{
         position: fixed;
         left: 60px;
         top: 4px;
-        color: #616161;
+        color: #616161; 
         z-index: 99;
       }
 
@@ -411,16 +409,16 @@
   
 
     <div class="hamburger-menu">
-      <input id="menu__toggle" type="checkbox" />
+      <input id="menu__toggle" type="checkbox" placeholder=" "/>
       <label class="menu__btn" for="menu__toggle">
         <span></span>
       </label>
-      <a href="/"><i class="fa fa-arrow-left" style="font-size: 30px;position: fixed;left: 60px;top: 4px;color: #616161;z-index: 99;"></i></a>
+      <a id="back-buttom" href="/"><i class="fa fa-arrow-left" style="font-size: 30px;"></i></a>
   
       <ul class="menu__box">
         <li><span class="menu__item" >Track Entity</span>
           <label class="switch">
-            <input type="checkbox" onClick="trackedEntity()" checked />
+            <input id="track-entity" type="checkbox" onClick="trackedEntity()" checked />
             <span class="slider round"></span>
           </label>
         </li>
@@ -536,6 +534,8 @@
       const rocket = viewer.entities.add(new Cesium.Entity());
       const rec = viewer.entities.add(new Cesium.Entity());
       const uncertaintyZone = viewer.entities.add(new Cesium.Entity());
+      const satellite = viewer2.entities.add(new Cesium.Entity());
+      const uncertaintyZone2 = viewer2.entities.add(new Cesium.Entity());
       let int = null;
       var flyDuration = 5 ;
       var clockMultipler = 1 ;
@@ -727,20 +727,11 @@
           {{height}}[i]*1000
           );
 
-        
-
-        //console.log(hpr1)
-        // Polyline position and < 3600 sec/1 hr (!!! Window !!!)
-
-        
-        //console.log(longitude[i]+0.375,latitude[i]+0.375,longitude[i]-0.375,latitude[i]-0.375)
-        
-        //console.log(time)
-        // Store the position along with its timestamp.
-        // Here we add the positions all upfront, but these can be added at run-time as samples are received from a server.
         positionProperty.addSample(time, position);
 
       }
+
+
       // STEP 6 CODE (object entity)
       //console.log(top_polygon.length)
       //console.log(buttom_polygon)
@@ -748,8 +739,10 @@
       //console.log(r)
       var poly = top_polygon.concat(r)
       //console.log(poly)
-      // Draw UncertaintyZone
-      for(let k = 0 ; k < top_polygon.length-4 ; k+=2){
+
+
+      // Draw UncertaintyZone per 4 latlong
+     for(let k = 0 ; k < top_polygon.length-4 ; k+=2){
         viewer.entities.add({
           parent : uncertaintyZone,
           name : "Zone : " + String((k/2)+1),
@@ -759,14 +752,17 @@
             clampToGround : true,
           },
         });
+
+        viewer2.entities.add({
+          parent : uncertaintyZone2,
+          name : "Zone : " + String((k/2)+1),
+          polygon: {
+            hierarchy: Cesium.Cartesian3.fromDegreesArray([poly.at(k),poly.at(k+1),poly.at(k+2),poly.at(k+3),poly.at((-k)-4),poly.at((-k)-3),poly.at((-k)-2),poly.at((-k)-1)]),
+            material: Cesium.Color.RED.withAlpha(0.4),
+            clampToGround : true,
+          },
+        });
       }
-
-      console.log(uncertaintyZone)
-
-
-
-
-
 
 
       async function loadModel() {
@@ -810,31 +806,6 @@
 
         // polyline
 
-        {% comment %} viewer.entities.add({
-          id : "Positive",
-          name: "Positive Uncertainty",
-          parent : polyline,
-          polyline: {
-            positions: Cesium.Cartesian3.fromDegreesArray(positive_uncertaintyZone),
-            width: 270,
-            material: Cesium.Color.RED.withAlpha(0.2),
-            clampToGround: true,
-          },
-        });
-
-        viewer.entities.add({
-          id : "Negative",d
-          name: "Negative Uncertainty",
-          parent : polyline,
-          polyline: {
-            positions: Cesium.Cartesian3.fromDegreesArray(negative_uncertaintyZone),
-            width: 50,
-            material: Cesium.Color.BLUE.withAlpha(0.2),
-            clampToGround: true,
-          },
-        }); {% endcomment %}
-
-        console.log("Load Model 1")
         let preobjPosition = entityPosition.find((e) => parseInt(e.ti.secondsOfDay) === parseInt(viewer.clock.currentTime.secondsOfDay+flyDuration));
         viewer.camera.flyTo({
           duration : flyDuration,
@@ -845,26 +816,24 @@
           ),
           complete : function(){viewer.trackedEntity = rocket._children[0]; viewer.selectedEntity = rocket._children[0] ; setTimeout(function() {viewer.camera.zoomOut(10)}, 400); }
         })
-
-
-        //viewer.flyTo(rocket._children[0]).then(function(){viewer.trackedEntity = rocket._children[0]; viewer.selectedEntity = rocket._children[0];});
-        //console.log(objectEntity.path.material.color._value)
-        //$(".display-time").text(entityPosition.at(-1).ti);
         isLoaded1 = true ;
+        console.log("Load Model 1")
       }
+
       async function loadModel2() {
         // Load the glTF model from Cesium ion.
-        const orientation = new Cesium.VelocityOrientationProperty(positionProperty)
+        const orientation2 = new Cesium.VelocityOrientationProperty(positionProperty)
         const objectUri2 = await Cesium.IonResource.fromAssetId(1111699);
-        const objectEntity2 = viewer2.entities.add({
+        viewer2.entities.add({
           availability: new Cesium.TimeIntervalCollection([
             new Cesium.TimeInterval({ start: start, stop: stop }),
           ]),
+          parent : satellite,
           model: { uri: objectUri2 , minimumPixelSize: 64,},
           position: positionProperty,
           // Attach the 3D model instead of the green point.
           // Automatically compute the orientation from the position.
-          orientation: orientation,
+          orientation: orientation2,
           path: new Cesium.PathGraphics({
             width: 3  ,
             material: Cesium.Color.ORANGE,
@@ -879,8 +848,9 @@
               pixelOffset: new Cesium.Cartesian2(0, -50)
           }
         });
+        isLoaded2 = true
         console.log("Load Model 2")
-
+        console.log(satellite)
         //console.log(objectEntity.path.material.color._value)
         //$(".display-time").text(entityPosition.at(-1).ti);
       }
@@ -895,22 +865,27 @@
 
 
 
-
       let t = 0;
       function myFunction() {
         console.log("Test" + t)
-        {% comment %} let test1=[poly.at(t),poly.at(t+1),poly.at(t+2),poly.at(t+3),poly.at((-t)-4),poly.at((-t)-3),poly.at((-t)-2),poly.at((-t)-1)]
-        t+= 2
-        console.log(test1)
-        const redPolygon1 = viewer.entities.add({
-          name: "Red polygon on surface",
-          polygon: {
-            hierarchy: Cesium.Cartesian3.fromDegreesArray(test1),
-            material: Cesium.Color.RED.withAlpha(0.5),
-            clampToGround : true,
+        t+=1
+
+        test = []
+        console.log(test.length)
+        const orangeOutlined = viewer.entities.add({
+          name:
+            "Orange line with black outline at height and following the surface",
+          polyline: {
+            positions: Cesium.Cartesian3.fromDegreesArrayHeights(test),
+            width: 5,
+            material: new Cesium.PolylineOutlineMaterialProperty({
+              color: Cesium.Color.ORANGE,
+              outlineWidth: 2,
+              outlineColor: Cesium.Color.BLACK,
+            }),
           },
-        }); {% endcomment %}
-        viewer.scene.debugShowFramesPerSecond = !viewer.scene.debugShowFramesPerSecond;
+        });
+        console.log(test)
 
         //viewer.scene.camera.lookAt(viewer.entities.values[0].position.getValue(viewer.clock.currentTime), new Cesium.Cartesian3(0,0,10000));
         //let serchObj = entityPosition.find((e) => parseInt(e.ti.secondsOfDay) == parseInt(viewer.clock.currentTime.secondsOfDay));
@@ -926,7 +901,7 @@
       console.log("Load Model Success");
 
 
-      let isTracked = true;
+      var isTracked = true;
       let searchObj = null;
       let green = 0;
       let red = 0;
@@ -944,8 +919,8 @@
         else if (searchObj !== undefined){
           $(".display-status").text("")
           $(".display-height").text( searchObj.alt + " km.")
-          $(".display-lat").text( searchObj.lat)
-          $(".display-long").text( searchObj.long)
+          $(".display-lat").text( searchObj.lat.toFixed(6))
+          $(".display-long").text( searchObj.long.toFixed(6))
           $(".display-velocity").text( searchObj.velocity.toFixed(2) + " km/s")
           let altitude = parseInt(searchObj.alt);
           if(altitude > 200){
@@ -978,7 +953,7 @@
         $(".display-time").text(dateformat)
         if(isLoaded1 == true){
           rocket._children[0].path.material.color._value = Cesium.Color.fromBytes(red,green,0)
-        //viewer2.entities.values[0].path.material.color._value = Cesium.Color.fromBytes(red,green,0)
+          satellite._children[0].path.material.color._value = Cesium.Color.fromBytes(red,green,0)
         }
         
         viewer2.clock.currentTime = viewer.clock.currentTime
@@ -1038,6 +1013,7 @@
         }
       }
 
+      // Jquery Zone 
 
       $('#show-earth2').click(function() {
         $('#cesiumContainer2').animate({width: 'toggle', opacity: '0.6'},"slow");
@@ -1046,6 +1022,7 @@
 
       $('#show-uncertaintyZone').click(function() {
         uncertaintyZone.show = !uncertaintyZone.show;
+        uncertaintyZone2.show = !uncertaintyZone2.show;
       })
 
       $('g.cesium-animation-rectButton').click(function() {
@@ -1054,6 +1031,25 @@
         console.log(atStop);
       })
 
+      $("button.cesium-button.cesium-toolbar-button.cesium-home-button").click(function() {
+        if($('#track-entity').is(':checked') == true){
+          $("#track-entity").prop('checked', !$('#track-entity').is(':checked'))
+          viewer.trackedEntity = undefined
+          viewer.selectedEntity = undefined
+          isTracked = false
+        }
+        
+      });
+      let isToggle = false
+      $('#menu__toggle').click(function() {
+        if(isToggle == false){
+          $('#back-buttom').animate({left: '240px'},"fast");
+        }
+        else{
+          $('#back-buttom').animate({left: '60px'},"fast");
+        }
+        isToggle = !isToggle
+      });
 
       //$('#cesiumContainer2.cesium-viewer-animationContainer').css({"display" : "none"})
       document.querySelector("#cesiumContainer2 > div > div.cesium-viewer-animationContainer").style.display = 'none';
@@ -1135,6 +1131,16 @@
         
       }
 
+      var entity = viewer.entities.add({
+        label: {
+          showBackground: true,
+          font: "14px monospace",
+          horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
+          verticalOrigin: Cesium.VerticalOrigin.TOP,
+          pixelOffset: new Cesium.Cartesian2(15, 0),
+        },
+      });
+      entity.show = false
 
       function showLatLong() {
         let scene = viewer.scene;
@@ -1143,23 +1149,13 @@
         }
 
         let handler;
-        let entity = viewer.entities.add({
-          label: {
-            show: false,
-            showBackground: true,
-            font: "14px monospace",
-            horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
-            verticalOrigin: Cesium.VerticalOrigin.TOP,
-            pixelOffset: new Cesium.Cartesian2(15, 0),
-          },
-        });
-    
+ 
         // Mouse over the globe to see the cartographic position
-        handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+        handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
         handler.setInputAction(function (movement) {
           let cartesian = viewer.camera.pickEllipsoid(
             movement.endPosition,
-            scene.globe.ellipsoid
+            viewer.scene.globe.ellipsoid
           );
           if (cartesian) {
             let cartographic = Cesium.Cartographic.fromCartesian(
@@ -1173,7 +1169,6 @@
             ).toFixed(4);
     
             entity.position = cartesian;
-            entity.label.show = true;
             entity.label.text =
               `Long: ${longitudeString}\u00B0` +
               `\nLat : ${latitudeString}\u00B0`;
@@ -1181,7 +1176,11 @@
             entity.label.show = false;
           }
         }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+        entity.show = !entity.show;
+        console.log(entity.show)
+        console.log(entity)
       }
+
       let markpoint = [];
 
       function findDistance() {
