@@ -14,7 +14,8 @@ class Drop_sim(models.Model):
     rcs = models.TextField()
     source = models.TextField()
     typeobj = models.TextField() 
-    dataset = models.TextField() 
+    dataset = models.TextField()
+    uncertainty = models.TextField() 
     
     def __str__(self):
         return str(self.norad_id)
