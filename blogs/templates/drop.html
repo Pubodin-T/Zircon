@@ -222,7 +222,7 @@
         width: 50%;
         height: 100%;
       }
-      .content{
+      .contentCesium{
         display : none;
       }
     </style>
@@ -563,46 +563,13 @@
      }
     </style>
 
-    <style>
-
-      .progressbar {
-        position: relative;
-        width: 170px;
-        height: 170px;
-        margin: 1em;
-        transform: rotate(-90deg);
-     }
-      .progressbar__svg {
-        position: relative;
-        width: 100%;
-        height: 100%;
-     }
-      .progressbar__svg-circle {
-        width: 100%;
-        height: 100%;
-        fill: none;
-        stroke-width: 10;
-        stroke-dasharray: 440;
-        stroke-dashoffset: 440;
-        stroke: grey;
-        stroke-linecap: round;
-        transform: translate(5px, 5px);
-        filter: drop-shadow(0 0 5px black);
-        animation: anim_circle-html 2s ease-in-out forwards;
-     }
-      
-      @keyframes anim_circle-html {
-        to {
-          stroke-dashoffset: 0;
-       }
-     }
-     
-    </style>
+    
 
     
 
   </head>
   <body>
+    
     <div id="universe">
       <div id="galaxy">
         <div class="circle"></div>
@@ -623,11 +590,10 @@
             <div id="dot2"></div>
           </div>
         </div>
-
       </div>
     </div>
 
-    <div class="content">
+    <div class="contentCesium">
       <div class="container">
         <div id="cesiumContainer" class="fullSize"></div>
         <div id="cesiumContainer2" class="fullSize"></div>
@@ -659,14 +625,6 @@
         </table>
       </div>
     </div>
-    
-    
-    
-
-    
-
-  
-
     <div class="hamburger-menu">
       <input id="menu__toggle" type="checkbox" placeholder=" "/>
       <label class="menu__btn" for="menu__toggle">
@@ -720,12 +678,19 @@
 
       </ul>
     </div>
+    
+    
+
+    
+
+  
+
+    
 
     <script>
-      $(universe).ready(function(){
+
         
-        console.log("reder")
-        Cesium.Ion.defaultAccessToken =
+      Cesium.Ion.defaultAccessToken =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZjhmYzkzOS1jNzI3LTQyZTQtYWJhYS00NGM0MDkxZjRkNmEiLCJpZCI6OTU5MTksImlhdCI6MTY1NDA1MjA1N30.zYK1AbmYJRYuMrU9-YayuYw8j96IEKkvpOmMjGsvr_8";
 
       // STEP 4 CODE (replaces steps 2 and 3)
@@ -846,7 +811,8 @@
       const positionProperty = new Cesium.SampledPositionProperty();
 
       for (let i = 0; i < {{totaldata}}; i++) {
-        console.log(i)
+        //console.log(i)
+        $(".progressbar__circle").css("stroke-dashoffset", 700 - (700 * i/{{totaldata}}))
         entityPosition.push({
           lat : {{latitude}}[i],
           long : {{longitude}}[i],
@@ -1192,7 +1158,7 @@
         
         console.log(resultTime[0])
 
-
+        $(".progressbar__circle").css("stroke-dashoffset", 700 - (700 * i/{{totaldata}}))
         
       }
 
@@ -1260,7 +1226,7 @@
         if(isLoaded1 == true && isLoaded2 == true && dataLoaded == true){
           rocket._children[0].path.material.color._value = Cesium.Color.fromBytes(red,green,0)
           satellite._children[0].path.material.color._value = Cesium.Color.fromBytes(red,green,0)
-          $(".content").css("display", "block")
+          $(".contentCesium").css("display", "block")
           $("#universe").css("display", "none")
         }
         
@@ -1501,7 +1467,6 @@
         
 
       }
-     });
     </script>
 
   </body>
