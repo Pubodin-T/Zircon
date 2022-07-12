@@ -5,22 +5,533 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.93/Build/Cesium/Cesium.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link
+      href="https://cesium.com/downloads/cesiumjs/releases/1.93/Build/Cesium/Widgets/widgets.css"
+      rel="stylesheet"
+    />
     {% comment %}
     <link rel="stylesheet" href="{% static '/frontend/css/style.css' %}" />
     {% endcomment %}
     <title>Index</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      .container {
+        position: fixed;
+        display: flex;
+        width: 100%;
+        height: 100%;
+      }
+      #cesiumContainer {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <style>
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #2f3640;
+        width: 100%;
+        overflow: auto;
+        z-index: 1;
+        top: 40px;
+        left: 0px;
+        max-height: 200px;
+      }
+
+      .dropdown-content a {
+        color: whitesmoke;
+        padding: 10px 10px;
+        margin-left: 5px;
+        text-decoration: none;
+        display: block;
+        background-color: #2f3640;
+      }
+
+      .dropdown a:hover {
+        background-color: #ddd;
+      }
+
+      /* width */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+        background-color: transparent;
+      }
+
+      /* Track */
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+        box-shadow: inset 0 0 5px grey;
+        margin-left: 5px;
+      }
+
+      /* Handle */
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+      }
+
+      /* Handle on hover */
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+      ::-webkit-scrollbar-corner {
+        background-color: transparent;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <script
+      src="https://kit.fontawesome.com/a34dc427c5.js"
+      crossorigin="anonymous"
+    ></script>
+    <style type="text/css">
+      body {
+        margin: 0;
+      }
+
+      .search {
+        position: absolute;
+        top: 25px;
+        left: 260px;
+        height: 20px;
+        border-radius: 30px;
+        padding: 10px;
+        transform: translate(-50%, -50%);
+        background: #2f3640;
+      }
+      .btn {
+        border-radius: 50%;
+        background: #2f3640;
+        color: #2471a3;
+        float: right;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
+      .text {
+        border: none;
+        background: none;
+        outline: none;
+        float: left;
+        color: #fff;
+        font-size: 16px;
+        transition: 0.6s;
+        line-height: 20px;
+        width: 265px;
+        padding: 0px 5px;
+        margin-left: 5px;
+      }
+      ::placeholder {
+        padding-left: 0px;
+        color: rgba(128, 122, 122, 0.822);
+      }
+    </style>
+
+    <style>
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+        top: -9px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 3px;
+        background-color: white;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+      }
+
+      input:checked + .slider {
+        background-color: #2196f3;
+      }
+
+      input:focus + .slider {
+        box-shadow: 0 0 1px #2196f3;
+      }
+
+      input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+      }
+
+      /* Rounded sliders */
+      .slider.round {
+        border: 0.5px solid black;
+        border-radius: 34px;
+      }
+
+      .slider.round:before {
+        border-radius: 50%;
+      }
+    </style>
+
+    <style>
+      #menu__toggle {
+        opacity: 0;
+      }
+      #menu__toggle:checked + .menu__btn > span {
+        transform: rotate(45deg);
+      }
+      #menu__toggle:checked + .menu__btn > span::before {
+        top: 0;
+        transform: rotate(0deg);
+      }
+      #menu__toggle:checked + .menu__btn > span::after {
+        top: 0;
+        transform: rotate(90deg);
+      }
+      #menu__toggle:checked ~ .menu__box {
+        left: 0 !important;
+      }
+      .menu__btn {
+        position: fixed;
+        top: 10px;
+        left: 20px;
+        width: 26px;
+        height: 26px;
+        cursor: pointer;
+        z-index: 1;
+        padding-top: 10px;
+      }
+      .menu__btn > span,
+      .menu__btn > span::before,
+      .menu__btn > span::after {
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        background-color: #616161;
+        transition-duration: 0.25s;
+      }
+      .menu__btn > span::before {
+        content: "";
+        top: -8px;
+      }
+      .menu__btn > span::after {
+        content: "";
+        top: 8px;
+      }
+      .menu__box {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 300px;
+        height: 100%;
+        margin: 0;
+        padding: 80px 0;
+        list-style: none;
+        background-color: #eceff1;
+        opacity: 0.8;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+        transition-duration: 0.25s;
+      }
+      .menu__item {
+        display: inline-block;
+        padding: 12px 24px;
+        color: #333;
+        font-family: "Roboto", sans-serif;
+        font-size: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        transition-duration: 0.25s;
+        width: 170px;
+      }
+
+      #back-buttom {
+        position: fixed;
+        left: 60px;
+        top: 4px;
+        color: #616161;
+        z-index: 99;
+      }
+    </style>
   </head>
 
   <body>
+    <div class="container">
+      <div id="cesiumContainer" class="fullSize"></div>
+    </div>
     
 
-        <a href="Object-id/43090" class="button"><button class="pixel">43090</button></a>
-        <a href="Object-id/37820" class="button"><button class="pixel">37820</button></a>
-        <a href="Object-id/37872" class="button"><button class="pixel">37872</button></a>
-        <a href="Object-id/37873" class="button"><button class="pixel">37873</button></a>
-        <a href="Object-id/40619" class="button"><button class="pixel">40619</button></a>
-        <a href="Object-id/48275" class="button"><button class="pixel">48275</button></a>
+    <div class="search">
+      <input
+        type="text"
+        id="search-box"
+        name=""
+        placeholder="Search by ID or Name"
+        class="text"
+        onkeyup="filterFunction()"
+      />
+      <i class="btn fa fa-search" onclick="routeObject()"></i>
+      <div id="list-object" class="dropdown-content">
+        {% for data in datas %}
+        <a class="obj-style" href="Object-id/{{data.norad_id}}" value="123"
+          ><nobr style="padding-right: 10px"
+            >ID : {{data.norad_id}} , {{data.sat_name}}</nobr
+          ></a
+        >
+        {% endfor %}
+        <a class="obj-style" style="display: none; text-align: center"
+          >No Object Found</a
+        >
+      </div>
     </div>
+
+    <div class="hamburger-menu">
+      <input id="menu__toggle" type="checkbox" placeholder=" " />
+      <label class="menu__btn" for="menu__toggle">
+        <span></span>
+      </label>
+      <a id="back-buttom" href="/"
+        ><i class="fa fa-arrow-left" style="font-size: 30px"></i
+      ></a>
+
+      <ul class="menu__box">
+        <li>
+          <span class="menu__item">Distance Measure</span>
+          <label class="switch">
+            <input type="checkbox" id="find-distance" />
+            <span class="slider round"></span>
+          </label>
+        </li>
+        <li>
+          <span class="menu__item">Show Position</span>
+          <label class="switch">
+            <input type="checkbox" id="show-LatLong" />
+            <span class="slider round"></span>
+          </label>
+        </li>
+      </ul>
+    </div>
+
+    <script>
+      var checknone = [];
+      /* When the user clicks on the button,
+      toggle between hiding and showing the dropdown content */
+      function routeObject() {
+        if (checknone.length != 0) {
+          if (checknone.includes(document.getElementById("search-box").value)) {
+            url = "Object-id/" + document.getElementById("search-box").value;
+            window.open(url, "_self");
+          } else {
+            url = "Object-id/" + checknone[0];
+            window.open(url, "_self");
+          }
+        } else {
+          window.alert("No Object Found");
+        }
+      }
+
+      function filterFunction() {
+        var input, filter, ul, li, a, i;
+        input = document.getElementById("search-box");
+        filter = input.value.toUpperCase();
+        div = document.getElementById("list-object");
+        a = div.getElementsByTagName("a");
+        checknone = [];
+        for (i = 0; i < a.length - 1; i++) {
+          txtValue = a[i].textContent || a[i].innerText;
+
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            a[i].style.display = "";
+            checknone.push(txtValue.split(" ")[2]);
+          } else {
+            a[i].style.display = "none";
+          }
+        }
+        a[a.length - 1].style.display = "none";
+        if (checknone.length == 0) {
+          a[a.length - 1].style.display = "";
+        }
+      }
+    </script>
+    <script>
+      Cesium.Ion.defaultAccessToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZjhmYzkzOS1jNzI3LTQyZTQtYWJhYS00NGM0MDkxZjRkNmEiLCJpZCI6OTU5MTksImlhdCI6MTY1NDA1MjA1N30.zYK1AbmYJRYuMrU9-YayuYw8j96IEKkvpOmMjGsvr_8";
+
+      // STEP 4 CODE (replaces steps 2 and 3)
+      // Keep your `Cesium.Ion.defaultAccessToken = 'your_token_here'` line from before here.
+      const cesiumTerrainProvider = Cesium.createWorldTerrain({
+        requestVertexNormals: true,
+        requestWaterMask: true,
+      });
+      // Render Cesium Map
+      const viewer = new Cesium.Viewer("cesiumContainer", {
+        terrainProvider: cesiumTerrainProvider,
+        geocoder: false,
+        fullscreenButton: false,
+        navigationHelpButton: false,
+      });
+
+      var entity = viewer.entities.add({
+        label: {
+          showBackground: true,
+          font: "14px monospace",
+          horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
+          verticalOrigin: Cesium.VerticalOrigin.TOP,
+          pixelOffset: new Cesium.Cartesian2(15, 0),
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+      });
+
+      entity.show = false;
+      var isToggle = false
+      
+      function showLatLong() {
+        let scene = viewer.scene;
+        if (!scene.pickPositionSupported) {
+          window.alert("This browser does not support pickPosition.");
+        }
+
+        // Mouse over the globe to see the cartographic position
+        let handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+        handler.setInputAction(function (movement) {
+          let cartesian = viewer.camera.pickEllipsoid(
+            movement.endPosition,
+            viewer.scene.globe.ellipsoid
+          );
+          if (cartesian) {
+            let cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+            let longitudeString = Cesium.Math.toDegrees(
+              cartographic.longitude
+            ).toFixed(4);
+            let latitudeString = Cesium.Math.toDegrees(
+              cartographic.latitude
+            ).toFixed(4);
+            entity.label.show = true;
+            entity.position = cartesian;
+            entity.label.text =
+              `Long: ${longitudeString}\u00B0` +
+              `\nLat : ${latitudeString}\u00B0`;
+          } else {
+            entity.label.show = false;
+          }
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+        entity.show = !entity.show;
+      }
+
+      let markpoint = [];
+
+      function findDistance() {
+        console.log("Distance Measure");
+        let handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas); //This method gets the latitude and longitude of the mouse click position
+        handler.setInputAction(function (e) {
+          let position = viewer.scene.pickPosition(e.position);
+          //Convert Cartesian coordinates to latitude and longitude coordinates
+          let cartographic = Cesium.Cartographic.fromCartesian(position);
+          let get_longitude = Cesium.Math.toDegrees(cartographic.longitude);
+          let get_latitude = Cesium.Math.toDegrees(cartographic.latitude);
+          let get_height = cartographic.height;
+          console.log(
+            "Longitude : " + get_longitude + "  Latitude : " + get_latitude
+          );
+          if (markpoint.length != 2) {
+            markpoint.push(get_longitude, get_latitude);
+          } else {
+            markpoint.push(get_longitude, get_latitude);
+            // Distance Formula
+            let R = 6371e3; // metres
+            let φ1 = (markpoint[1] * Math.PI) / 180; // φ, λ in radians << Degree to radians
+            let φ2 = (markpoint[3] * Math.PI) / 180;
+            let Δφ = ((markpoint[3] - markpoint[1]) * Math.PI) / 180;
+            let Δλ = ((markpoint[2] - markpoint[0]) * Math.PI) / 180;
+            let a =
+              Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            let d = R * c; // in metres
+            console.log("Distance : " + (d / 1000).toFixed(3) + " km");
+            markpoint = [];
+          }
+        }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+      }
+
+      $(document).ready(function () {
+        $("#search-box").focusin(function () {
+          $("#list-object").slideDown(500);
+          $(".search").css({ "border-radius": "20px 20px 0px 0px" });
+          $(".dropdown-content").css({ "border-radius": "0px 0px 10px 10px" });
+        });
+
+        $("#search-box").focusout(function () {
+          setTimeout(function () {
+            $("#list-object").slideUp(0);
+            $(".search").css({ "border-radius": "30px" });
+          }, 100);
+        });
+
+        $("#search-box").on("keyup", function (e) {
+          if (e.key === "Enter" || e.keyCode === 13) {
+            routeObject();
+          }
+        });
+        $("#find-distance").click(function () {
+          findDistance();
+        });
+        $("#show-LatLong").click(function () {
+          showLatLong();
+        });
+        
+        $('#menu__toggle').click(function() {
+          if(isToggle == false){
+            $('#back-buttom').animate({left: '240px'},"fast");
+            $('.search').animate({left: '465px'},"fast");
+          }
+          else{
+            $('#back-buttom').animate({left: '60px'},"fast");
+            $('.search').animate({left: '260px'},"fast");
+          }
+          isToggle = !isToggle
+        });
+      });
+    </script>
   </body>
 </html>

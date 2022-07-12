@@ -17,7 +17,8 @@ def drop_sim(request):
     return render(request, "drop.html",{'data':data})
 
 def index(request):
-    return render(request, "index.html")
+    datas = Drop_sim.objects.all()
+    return render(request, "index.html",{'datas':datas})
 
 def match(request, objid=None):
     # then do whatever you want with your params

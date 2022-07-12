@@ -625,6 +625,7 @@
         </table>
       </div>
     </div>
+    
     <div class="hamburger-menu">
       <input id="menu__toggle" type="checkbox" placeholder=" "/>
       <label class="menu__btn" for="menu__toggle">
@@ -635,7 +636,7 @@
       <ul class="menu__box">
         <li><span class="menu__item" >Track Entity</span>
           <label class="switch">
-            <input id="track-entity" type="checkbox" onClick="trackedEntity()" checked />
+            <input  type="checkbox" id="track-entity" checked />
             <span class="slider round"></span>
           </label>
         </li>
@@ -653,25 +654,25 @@
         </li>
         <li><span class="menu__item" >Distance Measure</span>
           <label class="switch">
-            <input type="checkbox" onClick="findDistance()" />
+            <input type="checkbox" id="find-distance"  />
             <span class="slider round"></span>
           </label>
         </li>
         <li><span class="menu__item" >Show Position</span>
           <label class="switch">
-            <input type="checkbox" onClick="showLatLong()" />
+            <input type="checkbox" id="show-LatLong"  />
             <span class="slider round"></span>
           </label>
         </li>
         <li><span class="menu__item" >Show FPS </span>
           <label class="switch">
-            <input type="checkbox" onClick="showFPS()" checked/>
+            <input type="checkbox" id="show-fps"  checked/>
             <span class="slider round"></span>
           </label>
         </li>
         <li><span class="menu__item" >Test </span>
           <label class="switch">
-            <input type="checkbox" onClick="myFunction()" />
+            <input type="checkbox" id="test"  />
             <span class="slider round"></span>
           </label>
         </li>
@@ -689,17 +690,21 @@
 
     <script>
 
-        
-      Cesium.Ion.defaultAccessToken =
+      $(document).ready(function Zircon(){
+        Cesium.Ion.defaultAccessToken =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZjhmYzkzOS1jNzI3LTQyZTQtYWJhYS00NGM0MDkxZjRkNmEiLCJpZCI6OTU5MTksImlhdCI6MTY1NDA1MjA1N30.zYK1AbmYJRYuMrU9-YayuYw8j96IEKkvpOmMjGsvr_8";
 
       // STEP 4 CODE (replaces steps 2 and 3)
       // Keep your `Cesium.Ion.defaultAccessToken = 'your_token_here'` line from before here.
-
+      const cesiumTerrainProvider = Cesium.createWorldTerrain({
+        requestVertexNormals: true,	
+        requestWaterMask:true
+      });
+      const ellipsoidTerrainProvider = new Cesium.EllipsoidTerrainProvider();
       // Render Cesium Map
       $('#cesiumContainer2').hide(0);
       const viewer = new Cesium.Viewer("cesiumContainer", {
-        terrainProvider: Cesium.createWorldTerrain(),
+        terrainProvider: cesiumTerrainProvider,
         geocoder: false,
         fullscreenButton: false,
         navigationHelpButton: false,
@@ -1158,7 +1163,7 @@
         
         console.log(resultTime[0])
 
-        $(".progressbar__circle").css("stroke-dashoffset", 700 - (700 * i/{{totaldata}}))
+
         
       }
 
@@ -1168,9 +1173,7 @@
 
         
 
-      function showFPS() {
-        viewer.scene.debugShowFramesPerSecond = !viewer.scene.debugShowFramesPerSecond;
-      }
+
 
       var isTracked = true;
       let searchObj = null;
@@ -1324,6 +1327,24 @@
       document.querySelector("#cesiumContainer2 > div > div.cesium-viewer-animationContainer").style.display = 'none';
       document.querySelector("#cesiumContainer2 > div > div.cesium-viewer-bottom").style.display = 'none';
 
+      $('#track-entity').click(function() {
+        trackedEntity()
+      })
+      $('#find-distance').click(function() {
+        findDistance()
+      })
+      $('#show-LatLong').click(function() {
+        showLatLong()
+      })
+      $('#show-fps').click(function() {
+        viewer.scene.debugShowFramesPerSecond = !viewer.scene.debugShowFramesPerSecond;
+      })
+      $('#test').click(function() {
+        myFunction()
+        console.log(viewer.terrainProvider)
+        //$("div[title='WGS84 standard ellipsoid, also known as EPSG:4326']").trigger( "click" );
+      })
+
 
 
 
@@ -1390,6 +1411,8 @@
           horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
           verticalOrigin: Cesium.VerticalOrigin.TOP,
           pixelOffset: new Cesium.Cartesian2(15, 0),
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
         },
       });
       entity.show = false
@@ -1427,6 +1450,7 @@
           }
         }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
         entity.show = !entity.show;
+
       }
 
       let markpoint = [];
@@ -1467,6 +1491,10 @@
         
 
       }
+     }); 
+
+        
+      
     </script>
 
   </body>
