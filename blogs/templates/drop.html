@@ -1068,7 +1068,6 @@
         const orientation = new Cesium.VelocityOrientationProperty(positionProperty)
         viewer.entities.add({
           parent : rocket ,
-          id : "Rocket",
           availability: new Cesium.TimeIntervalCollection([
             new Cesium.TimeInterval({ start: start, stop: stop }),
           ]),
@@ -1340,8 +1339,7 @@
         viewer.scene.debugShowFramesPerSecond = !viewer.scene.debugShowFramesPerSecond;
       })
       $('#test').click(function() {
-        myFunction()
-        console.log(viewer.terrainProvider)
+        console.log(viewer.entities.values)
         //$("div[title='WGS84 standard ellipsoid, also known as EPSG:4326']").trigger( "click" );
       })
 

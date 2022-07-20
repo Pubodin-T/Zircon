@@ -1,24 +1,25 @@
 from django.shortcuts import render
 from .models import Drop_sim
+from datetime import datetime
 import re
 import math
 # Create your views here.
 
 
-
-
-def drop_sim(request):
-    #data = Drop_sim.objects.all()
-    norad_id = 51689
-    data = Drop_sim.objects.get(norad_id=norad_id)
-    
-    # formatDate = data.msg_epoch.strftime("%Y-%m-%d %H:%M:%S")
-    # print(formatDate)
-    return render(request, "drop.html",{'data':data})
-
 def index(request):
-    datas = Drop_sim.objects.all()
-    return render(request, "index.html",{'datas':datas})
+    # Order by Decay Epoch Date
+    reentry_dates = []
+    datas = Drop_sim.objects.all().order_by('-decay_epoch')
+    for data in datas:
+        line_split = data.dataset.split('\r\n')
+        reentry_date = line_split[-1].split(" ")[0]
+        reentry_time = line_split[-1].split(" ")[1]
+        x = datetime(int(reentry_date.split("/")[0]), int(reentry_date.split("/")[1]), int(reentry_date.split("/")[2]),int(reentry_time.split(":")[0]),int(reentry_time.split(":")[1]),int(reentry_time.split(":")[2][:2]))
+        reentry_dates.append(x.strftime("%d %b %Y , %H:%M:%S UTC"))
+    context = {
+        'zip_datas': zip(datas, reentry_dates),
+    }
+    return render(request, "index.html",context)
 
 def match(request, objid=None):
     # then do whatever you want with your params

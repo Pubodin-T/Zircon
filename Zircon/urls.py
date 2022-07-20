@@ -21,6 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     #path('',include("blogs.urls"))
     path('',views.index),
-    path('drop',views.drop_sim),
     path('Object-id/<int:objid>', views.match),
 ]
