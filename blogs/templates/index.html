@@ -331,7 +331,7 @@
       <i class="btn fa fa-search" onclick="routeObject()"></i>
       <div id="list-object" class="dropdown-content">
         {% for datas,reentry_dates in zip_datas %}
-        <a class="obj-style" href="Object-id/{{datas.norad_id}}"
+        <a class="obj-style" href="/Object-id/{{datas.norad_id}}"
           ><nobr style="padding-right: 10px"
             >ID : {{datas.norad_id}} , {{datas.sat_name}} </nobr
           ><br /><span style="font-size: 14px; color: #ababab"
@@ -346,6 +346,7 @@
         >
       </div>
     </div>
+
     <div id="infoPanel"></div>
     <div class="hamburger-menu">
       <input id="menu__toggle" type="checkbox" placeholder=" " />
@@ -452,7 +453,7 @@
       $(".cesium-baseLayerPicker-item").eq(4).css("display","none");
 
       // Edit Logo Here !!!
-      $(".cesium-widget-credits").html('<div style="display: inline;"><a href="https://demo.gistda.or.th/news_view.php?n_id=2325&lang=EN" target="_blank"><img title="Zircon" src="{% static '/asset/zircon.png' %}" style=" width: 120px; height:80px " ></a></div>');
+      $(".cesium-widget-credits").html('<div style="display: inline;"><a href="https://demo.gistda.or.th/news_view.php?n_id=2325&lang=EN" target="_blank"><img title="Zircon" src="{% static '/asset/zircon.png' %}" style=" width: 120px; height:80px; position: fixed; bottom: 15px;" ></a></div>');
 
 
       var entity = viewer.entities.add({
@@ -596,6 +597,12 @@
         Array.from(list_label, x => viewer.entities.removeById(x))
         Array.from(list_point, x => viewer.entities.removeById(x))
         Array.from(list_poly, x => viewer.entities.removeById(x))
+        list_label = []
+        list_point = []
+        list_poly = []
+        count_label = 0
+        count_point = 0
+        count_poly = 0
       }
 
       function findDistance(){
@@ -696,7 +703,6 @@
         });
         $("#infoPanel").last().click(function () {
           removeEntity();
-          console.log("test")
         });
         $('#menu__toggle').click(function() {
           if(isToggle == false){
@@ -708,6 +714,9 @@
             $('.search').animate({left: '260px'},"fast");
           }
           isToggle = !isToggle
+        });
+        $("#test").click(function () {
+          console.log(viewer)
         });
       });
     </script>
