@@ -39,12 +39,7 @@ def match(request, objid=None):
     norad_id = objid
     data = Drop_sim.objects.get(norad_id=norad_id)
     print("Request ObjectID : " + str(objid))
-    # regex = "[\-| ][0-9]+\.[0-9]+"
-    # reTime = "\d{4}\/\d\d\/\d\d\s\d\d:\d\d:\d\d\.\d*"
-    # r = re.findall(regex, data.dataset)
-    # rt = re.findall(reTime, data.dataset)
     line_split = data.dataset.split('\r\n')
-    index = 0
     date = []
     velocity = []
     latitude = []

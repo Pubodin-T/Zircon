@@ -10,7 +10,7 @@
       href="https://cesium.com/downloads/cesiumjs/releases/1.93/Build/Cesium/Widgets/widgets.css"
       rel="stylesheet"
     />
-    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     {% comment %}
     <link rel="stylesheet" href="{% static '/frontend/css/style.css' %}" />
     {% endcomment %}
@@ -61,6 +61,14 @@
 
       .dropdown-content a:hover {
         background-color: #14171c;
+      }
+
+      .norad-id {
+        padding-right: 10px;
+      }
+      .reentry_date {
+        font-size: 14px;
+        color: #ababab;
       }
 
       /* width */
@@ -332,9 +340,9 @@
       <div id="list-object" class="dropdown-content">
         {% for datas,reentry_dates in zip_datas %}
         <a class="obj-style" href="/Object-id/{{datas.norad_id}}"
-          ><nobr style="padding-right: 10px"
+          ><nobr class="norad-id"
             >ID : {{datas.norad_id}} , {{datas.sat_name}} </nobr
-          ><br /><span style="font-size: 14px; color: #ababab"
+          ><br /><span class="reentry_date"
             >Re-entry in : {{reentry_dates}}</span
           ></a
         >
@@ -349,11 +357,11 @@
 
     <div id="infoPanel"></div>
     <div class="hamburger-menu">
-      <input id="menu__toggle" type="checkbox" placeholder=" " />
+      <input id="menu__toggle" type="checkbox" title="menu" placeholder="." />
       <label class="menu__btn" for="menu__toggle">
         <span></span>
       </label>
-      <a id="back-buttom" href="/"
+      <a id="back-buttom" title="Home Page" href="../"
         ><i class="fa fa-arrow-left" style="font-size: 30px"></i
       ></a>
 
@@ -361,21 +369,18 @@
         <li>
           <span class="menu__item">Distance Measure</span>
           <label class="switch">
-            <input type="checkbox" id="find-distance" />
+            <input
+              type="checkbox"
+              id="find-distance"
+              title="Distance Measure"
+            />
             <span class="slider round"></span>
           </label>
         </li>
         <li>
           <span class="menu__item">Show Position</span>
           <label class="switch">
-            <input type="checkbox" id="show-LatLong" />
-            <span class="slider round"></span>
-          </label>
-        </li>
-        <li>
-          <span class="menu__item">Test</span>
-          <label class="switch">
-            <input type="checkbox" id="test" />
+            <input type="checkbox" id="show-LatLong" title="Show Position" />
             <span class="slider round"></span>
           </label>
         </li>
@@ -389,10 +394,10 @@
       function routeObject() {
         if (checknone.length != 0) {
           if (checknone.includes(document.getElementById("search-box").value)) {
-            url = "Object-id/" + document.getElementById("search-box").value;
+            url = "../Object-id/" + document.getElementById("search-box").value;
             window.open(url, "_self");
           } else {
-            url = "Object-id/" + checknone[0];
+            url = "../Object-id/" + checknone[0];
             window.open(url, "_self");
           }
         } else {
@@ -479,7 +484,7 @@
       const isConstant = false;
       var activeShapePoints = [];
       var activeShape;
-      let floatingPoint;
+      var floatingPoint;
       var startCartographic = new Cesium.Cartographic();
       var endCartographic = new Cesium.Cartographic();
       const scratch = new Cesium.Cartographic();
@@ -489,12 +494,10 @@
       const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 
       function showLatLong() {
-        let scene = viewer.scene;
-        if (!scene.pickPositionSupported) {
+        if (!viewer.scene.pickPositionSupported) {
           window.alert("This browser does not support pickPosition.");
         }
         // Mouse over the globe to see the cartographic position
-        let handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
         handler.setInputAction(function (movement) {
           let cartesian = viewer.camera.pickEllipsoid(
             movement.endPosition,
@@ -511,8 +514,8 @@
             entity.label.show = true;
             entity.position = cartesian;
             entity.label.text =
-              `Long: ${longitudeString}\u00B0` +
-              `\nLat : ${latitudeString}\u00B0`;
+              `Lat : ${latitudeString}\u00B0` +
+              `\nLong: ${longitudeString}\u00B0`;
           } else {
             entity.label.show = false;
           }
@@ -714,9 +717,6 @@
             $('.search').animate({left: '260px'},"fast");
           }
           isToggle = !isToggle
-        });
-        $("#test").click(function () {
-          console.log(viewer)
         });
       });
     </script>
