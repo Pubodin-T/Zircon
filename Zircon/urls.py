@@ -20,6 +20,11 @@ from blogs import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     #path('',include("blogs.urls"))
-    path('',views.index),
+    path('',views.homePageView, name="home"),
+    path('select-object',views.index),
     path('Object-id/<int:objid>', views.match),
+    path("map/", views.MapView, name="test"),
+    path("UTM1/", views.UTM1View, name="UTM1"),
+    path("UTM2/", views.UTM2View, name="UTM2"),
+    path("TableCoord/", views.TableCoordView, name="table_coord"),
 ]

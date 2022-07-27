@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'blogs',
-    'jsonfield'
 ]
 
 MIDDLEWARE = [
@@ -82,10 +81,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'zircon',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST' : 'localhost',
-        'PORT' : ''
+        'USER': 'arlapp',
+        'PASSWORD': 'fdsus2019',
+        'HOST' : '172.27.188.71',
+        'PORT' : '3306'
     }
 }
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760

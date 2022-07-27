@@ -18,4 +18,14 @@ class Drop_sim(models.Model):
     
     def __str__(self):
         return str(self.norad_id)
+
+class Launch_site(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.TextField()
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    
+    
+    def __str__(self):
+        return str(self.name)
     
