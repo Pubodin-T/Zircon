@@ -1051,7 +1051,7 @@
        // The SampledPositionedProperty stores the position and timestamp for each sample along the radar sample series.
        const positionProperty = new Cesium.SampledPositionProperty();
 
-       function uncertaintyPoint(lat,lon){
+       function uncertaintyPoint(lat,lon,uncertainty_range){
         let tr_lat = 0;
         let tr_long = 0;
         let bl_lat = 0;
@@ -1060,17 +1060,18 @@
         let tl_long = 0;
         let br_lat = 0;
         let br_long = 0;
-        tr_lat =  lat+uncertaintyRange
-        tr_long =  lon+uncertaintyRange
+        tr_lat =  lat+uncertainty_range
+        tr_long =  lon+uncertainty_range
 
-        tl_lat =  lat+uncertaintyRange
-        tl_long =  lon-uncertaintyRange
+        tl_lat =  lat+uncertainty_range
+        tl_long =  lon-uncertainty_range
 
-        bl_lat =  lat-uncertaintyRange
-        bl_long =  lon-uncertaintyRange
+        bl_lat =  lat-uncertainty_range
+        bl_long =  lon-uncertainty_range
 
-        br_lat =  lat-uncertaintyRange
-        br_long =  lon+uncertaintyRange
+        br_lat =  lat-uncertainty_range
+        br_long =  lon+uncertainty_range
+        
 
         if(tr_long > 180){
           tr_long = tr_long - 360
@@ -1119,7 +1120,7 @@
            ti : jd[i],
            velocity : {{velocity}}[i]
         });
-        let result = uncertaintyPoint({{latitude}}[i],{{longitude}}[i])
+        let result = uncertaintyPoint({{latitude}}[i],{{longitude}}[i],uncertaintyRange)
          if(i != {{totaldata}} - 1 && Cesium.JulianDate.secondsDifference(jd.at(-1),jd[i]) <= windowtime  && i%10 == 0 ){
            if({{latitude}}[i+1] - {{latitude}}[i] > 0){
              top_polygon.push(result.tl_long,result.tl_lat)
@@ -1152,7 +1153,7 @@
        // Positive_uncertaintyZone
 
        for (let i = 0; i < {{uct_lat}}.length; i++) {
-        let result = uncertaintyPoint({{uct_lat}}[i],{{uct_lon}}[i])
+        let result = uncertaintyPoint({{uct_lat}}[i],{{uct_lon}}[i],uncertaintyRange)
          if(i != {{uct_lat}}.length - 1  && i%10 == 0 ){
            if({{uct_lat}}[i+1] - {{uct_lat}}[i] > 0){
              top_polygon.push(result.tl_long,result.tl_lat)
@@ -1208,7 +1209,7 @@
            ]),
            position: positionProperty,
            // Attach the 3D model instead of the green point.
-           model: { uri: objectUri , minimumPixelSize: 64,},
+           model: { uri: objectUri , minimumPixelSize: 75,},
            // Automatically compute the orientation from the position.
            orientation: orientation,
            path: new Cesium.PathGraphics({
@@ -1252,13 +1253,13 @@
        async function loadModel2() {
          // Load the glTF model from Cesium ion.
          const orientation2 = new Cesium.VelocityOrientationProperty(positionProperty)
-         const objectUri2 = await Cesium.IonResource.fromAssetId(1111699);
+         const objectUri2 = await Cesium.IonResource.fromAssetId(1223174);
          viewer2.entities.add({
            availability: new Cesium.TimeIntervalCollection([
              new Cesium.TimeInterval({ start: start, stop: stop }),
            ]),
            parent : satellite,
-           model: { uri: objectUri2 , minimumPixelSize: 80, },
+           model: { uri: objectUri2 , minimumPixelSize: 100, },
            position: positionProperty,
            // Attach the 3D model instead of the green point.
            // Automatically compute the orientation from the position.
@@ -1287,6 +1288,28 @@
          return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
        }
 
+
+      const drop_spot = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees({{longitude}}.at(-1), {{latitude}}.at(-1)),
+        show : false,
+        name : "Drop at Long : " + String({{longitude}}.at(-1)) + " Lat :  " +String({{latitude}}.at(-1)),
+        point: {
+          color: Cesium.Color.RED,
+          pixelSize: 10,
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        },
+        label: {
+          text: "Drop Spot",
+          font: "14pt sans-serif",
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
+          verticalOrigin: Cesium.VerticalOrigin.BASELINE,
+          showBackground: true,
+          pixelOffset: new Cesium.Cartesian2(15, 0),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY, // draws the label in front of terrain
+        },
+      });
+
        var isTracked = true;
        let searchObj = null;
        let green = 0;
@@ -1301,6 +1324,7 @@
            $(".display-lat").text(entityPosition.at(-1).lat)
            $(".display-long").text(entityPosition.at(-1).long)
            $(".display-velocity").text("0 km/s")
+           drop_spot.show = true
          }
          else if (searchObj !== undefined){
            $(".display-status").text("")
@@ -1308,6 +1332,7 @@
            $(".display-lat").text( searchObj.lat.toFixed(6))
            $(".display-long").text( searchObj.long.toFixed(6))
            $(".display-velocity").text( searchObj.velocity.toFixed(2) + " km/s")
+           drop_spot.show = false
            let altitude = parseInt(searchObj.alt);
            if(altitude > 200){
              // Green Zone !!!
@@ -1552,12 +1577,23 @@
        viewer2.scene.screenSpaceCameraController.enableTilt = false;
        viewer2.scene.screenSpaceCameraController.enableLook = false;
 
+       let drop_position = uncertaintyPoint({{latitude}}.at(-1),{{longitude}}.at(-1),0.1)
+       {% comment %} viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees({{longitude}}.at(-1),{{latitude}}.at(-1)),
+        billboard: {
+          image: "../static/asset/drop.png",
+          
+        },
+      }); {% endcomment %}
+
        // Add Image
        {% comment %} const layers = viewer.scene.imageryLayers.addImageryProvider(
          new Cesium.SingleTileImageryProvider({
            url: "../static/asset/drop.png",
-           rectangle: Cesium.Rectangle.fromDegrees(-75.0, 28.0, -67.0, 29.75),
-         }));  {% endcomment %}
+           rectangle: Cesium.Rectangle.fromDegrees(drop_position.tr_long, drop_position.tr_lat, drop_position.bl_long, drop_position.bl_lat),
+         })); {% endcomment %}
+         
+
 
 
          var entity = viewer.entities.add({
